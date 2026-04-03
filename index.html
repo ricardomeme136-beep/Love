@@ -126,17 +126,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
 <div class="main">
 
-  <div id="apikey-card" class="ingr-card" style="border-color:rgba(196,98,45,0.35);margin-bottom:1.25rem;">
-    <p class="section-label">🔑 Chave da API</p>
-    <p style="font-size:0.82rem;color:var(--mid);margin-bottom:0.75rem;line-height:1.6;">Para gerar receitas precisas de uma chave gratuita da Anthropic.<br>
-    <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--terra);text-decoration:underline;">Clica aqui para criar a tua chave →</a></p>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input type="password" id="apikey-input" placeholder="sk-ant-..." style="flex:1;border:1px solid var(--border);border-radius:10px;padding:0.6rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.85rem;background:var(--cream);color:var(--text);outline:none;">
-      <button class="btn-sec" style="white-space:nowrap;padding:0.6rem 1rem;" onclick="saveKey()">Guardar</button>
-    </div>
-    <p id="key-status" style="font-size:0.75rem;margin-top:0.5rem;color:var(--sage-d);display:none;">✓ Chave guardada!</p>
-  </div>
-
   <div class="ingr-card">
     <p class="section-label">O que tens em casa?</p>
     <div class="cat-label">🌾 Cereais & Hidratos</div>
@@ -251,21 +240,7 @@ let selected = new Set();
 let mealType = '';
 let saved = JSON.parse(localStorage.getItem('receitas_v3') || '[]');
 
-function saveKey() {
-  const val = document.getElementById('apikey-input').value.trim();
-  if (!val) return;
-  localStorage.setItem('anthropic_key', val);
-  document.getElementById('key-status').style.display = 'block';
-  setTimeout(()=>{ document.getElementById('apikey-card').style.borderColor='rgba(107,143,113,0.5)'; }, 200);
-}
-
 function init() {
-  const savedKey = localStorage.getItem('anthropic_key');
-  if (savedKey) {
-    document.getElementById('apikey-input').value = savedKey;
-    document.getElementById('key-status').style.display = 'block';
-    document.getElementById('apikey-card').style.borderColor = 'rgba(107,143,113,0.5)';
-  }
   // Hero collage
   const heroBg = document.getElementById('hero-bg');
   HERO_IDS.forEach(id => {
@@ -342,12 +317,7 @@ Cria UMA receita deliciosa. Podes assumir que tem sal, pimenta e azeite.
 Responde APENAS em JSON válido, sem texto extra, sem backticks:
 {"nome":"Nome criativo","tipo":"tipo refeição","tempo":"X min","porcoes":"X porções","dificuldade":"Fácil/Médio/Difícil","emoji":"1 emoji que represente o prato","ingredientes_usados":["item1","item2"],"passos":["Passo 1 detalhado","Passo 2","Passo 3","Passo 4"],"dica":"Uma dica especial"}`;
 
-  const apiKey = localStorage.getItem('anthropic_key') || '';
-  if (!apiKey) {
-    document.getElementById('result').innerHTML = '<div class="err">⚠️ Mete a tua chave da API no topo da página primeiro! 🔑</div>';
-    btn.disabled = false; btn.textContent = '✨ Criar Receita';
-    return;
-  }
+  const apiKey = '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';
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method:"POST",
