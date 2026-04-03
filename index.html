@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comida da Sofia Beatriz (Mor) 🍳</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cream:#FDF8F0;--warm:#FFFEF9;
+  --terra:#C4622D;--terra-l:#F0D5C4;--terra-d:#8B3D17;
+  --sage:#6B8F71;--sage-l:#D4E6D6;--sage-d:#3D5E42;
+  --text:#2C1810;--mid:#6B4C3B;--muted:#A08070;
+  --border:rgba(196,98,45,0.15);--shadow:rgba(44,24,16,0.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+
+.hero{position:relative;height:260px;overflow:hidden;display:flex;align-items:flex-end;}
+.hero-bg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:3px;}
+.hero-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(0.7);}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(44,24,16,0.9) 0%,rgba(44,24,16,0.15) 60%,transparent 100%);}
+.hero-text{position:relative;z-index:2;padding:1.5rem;width:100%;}
+.hero-text h1{font-family:'Playfair Display',serif;color:#fff;font-size:2rem;font-weight:600;line-height:1.15;}
+.hero-text p{color:rgba(255,255,255,0.72);font-size:0.88rem;margin-top:0.3rem;}
+
+.main{max-width:720px;margin:0 auto;padding:1.5rem 1rem 5rem;}
+.section-label{font-family:'Playfair Display',serif;font-size:1rem;color:var(--terra-d);margin-bottom:0.7rem;font-style:italic;}
+
+.ingr-card{background:var(--warm);border:1px solid var(--border);border-radius:18px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 2px 14px var(--shadow);}
+.cat-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:500;margin:1rem 0 0.5rem;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.cat-label:first-child{margin-top:0;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:0.8rem;color:var(--mid);cursor:pointer;transition:all .16s;user-select:none;display:flex;align-items:center;gap:5px;}
+.chip:hover{border-color:var(--terra);color:var(--terra-d);background:var(--terra-l);}
+.chip.on{background:var(--terra);border-color:var(--terra);color:#fff;}
+.chip .ci{font-size:1rem;line-height:1;}
+
+.sel-bar{background:var(--sage-l);border:1px solid rgba(107,143,113,0.3);border-radius:12px;padding:0.7rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--sage-d);min-height:42px;display:flex;align-items:center;flex-wrap:wrap;gap:5px;}
+.sel-bar .ph{color:var(--sage);font-style:italic;}
+.sel-tag{background:var(--sage);color:#fff;border-radius:20px;padding:3px 9px;font-size:0.76rem;}
+
+.meal-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1.25rem;}
+.mtype{flex:1;min-width:75px;background:var(--warm);border:1px solid var(--border);border-radius:10px;padding:0.45rem 0.5rem;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--mid);cursor:pointer;text-align:center;transition:all .16s;}
+.mtype.on{background:var(--sage);border-color:var(--sage);color:#fff;font-weight:500;}
+.mtype:hover:not(.on){border-color:var(--sage);color:var(--sage-d);background:var(--sage-l);}
+
+.controls{display:flex;gap:8px;margin-bottom:1.5rem;}
+.btn-main{flex:1;background:var(--terra);color:#fff;border:none;border-radius:12px;padding:0.8rem;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:500;cursor:pointer;transition:all .18s;box-shadow:0 3px 14px rgba(196,98,45,0.3);}
+.btn-main:hover{background:var(--terra-d);transform:translateY(-1px);box-shadow:0 5px 18px rgba(196,98,45,0.35);}
+.btn-main:active{transform:translateY(0);}
+.btn-main:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;transform:none;}
+.btn-sec{background:var(--warm);color:var(--mid);border:1px solid var(--border);border-radius:12px;padding:0.8rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;transition:all .16s;}
+.btn-sec:hover{background:var(--terra-l);color:var(--terra-d);border-color:var(--terra);}
+
+.loading-card{background:var(--warm);border:1px solid var(--border);border-radius:18px;padding:2.5rem;text-align:center;color:var(--muted);font-size:0.88rem;}
+.dots{display:inline-flex;gap:5px;margin-top:1rem;}
+.dots span{width:8px;height:8px;border-radius:50%;background:var(--terra);animation:bounce 1.2s infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5;}30%{transform:translateY(-8px);opacity:1;}}
+
+.rcard{background:var(--warm);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 4px 24px var(--shadow);animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.rcard-img-wrap{position:relative;width:100%;height:220px;overflow:hidden;}
+.rcard-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.rcard-img-ph{width:100%;height:220px;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,var(--terra-l),var(--sage-l));}
+.rcard-header{padding:1.25rem 1.5rem 0.75rem;}
+.rcard-tag{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--terra);font-weight:500;margin-bottom:0.3rem;}
+.rcard-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:600;color:var(--text);line-height:1.2;}
+.rcard-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:0.75rem;}
+.rmeta{background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:0.76rem;color:var(--mid);}
+.rcard-body{padding:0 1.5rem 0.5rem;}
+.rsec-title{font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--terra);margin:1.1rem 0 0.5rem;font-style:italic;}
+.ingr-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.ingr-pill{background:var(--terra-l);border-radius:20px;padding:4px 10px;font-size:0.78rem;color:var(--terra-d);font-weight:500;}
+.steps{list-style:none;counter-reset:s;}
+.steps li{counter-increment:s;display:flex;gap:11px;margin-bottom:0.85rem;font-size:0.86rem;line-height:1.65;color:var(--text);}
+.steps li::before{content:counter(s);min-width:25px;height:25px;background:var(--terra);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;flex-shrink:0;margin-top:1px;}
+.tip-box{background:var(--sage-l);border-left:3px solid var(--sage);border-radius:0 10px 10px 0;padding:0.85rem 1rem;margin-top:1rem;font-size:0.84rem;color:var(--sage-d);line-height:1.6;}
+.tip-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--sage);font-weight:500;margin-bottom:0.25rem;}
+.rcard-actions{display:flex;gap:8px;padding:1rem 1.5rem 1.5rem;flex-wrap:wrap;}
+.btn-sm{padding:0.45rem 0.85rem;font-size:0.78rem;border-radius:8px;border:1px solid var(--border);background:var(--cream);color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.btn-sm:hover{background:var(--terra-l);border-color:var(--terra);color:var(--terra-d);}
+
+.err{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:1rem 1.25rem;font-size:0.84rem;color:#7F1D1D;}
+.saved-sec{margin-top:2rem;}
+.saved-grid{display:grid;gap:10px;}
+
+.sitem{background:var(--warm);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;cursor:pointer;transition:all .18s;box-shadow:0 1px 8px var(--shadow);}
+.sitem:hover{border-color:var(--terra);box-shadow:0 3px 14px var(--shadow);}
+.sitem-img{width:80px;height:80px;object-fit:cover;flex-shrink:0;}
+.sitem-img-ph{width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:linear-gradient(135deg,var(--terra-l),var(--sage-l));flex-shrink:0;}
+.sitem-body{flex:1;padding:0.75rem 1rem;display:flex;flex-direction:column;justify-content:center;}
+.sitem-title{font-family:'Playfair Display',serif;font-size:0.92rem;color:var(--text);}
+.sitem-meta{font-size:0.72rem;color:var(--muted);margin-top:0.2rem;}
+.sitem-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:0.75rem;transition:color .15s;align-self:center;flex-shrink:0;}
+.sitem-del:hover{color:#C0392B;}
+.empty-saved{text-align:center;color:var(--muted);font-size:0.84rem;padding:1.5rem;border:1px dashed var(--border);border-radius:12px;font-style:italic;}
+.badge{background:var(--terra);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;font-weight:500;margin-left:5px;vertical-align:middle;}
+.divider{height:1px;background:var(--border);margin:1.5rem 0;}
+
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(44,24,16,0.55);z-index:100;align-items:center;justify-content:center;padding:1rem;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--warm);border-radius:20px;max-width:620px;width:100%;max-height:88vh;overflow-y:auto;animation:fadeUp .3s ease;}
+
+@media(max-width:480px){
+  .hero{height:200px;}
+  .hero-text h1{font-size:1.55rem;}
+  .rcard-title{font-size:1.25rem;}
+  .main{padding:1rem 0.75rem 4rem;}
+  .hero-bg{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <h1>Comida da Sofia Beatriz</h1>
+    <p>As tuas receitas especiais, Mor 🤍 — escolhe o que tens e eu crio algo delicioso</p>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="ingr-card">
+    <p class="section-label">O que tens em casa?</p>
+    <div class="cat-label">🌾 Cereais & Hidratos</div>
+    <div class="chips" id="g-cereais"></div>
+    <div class="cat-label">🥚 Proteínas</div>
+    <div class="chips" id="g-proteinas"></div>
+    <div class="cat-label">🥦 Legumes</div>
+    <div class="chips" id="g-legumes"></div>
+    <div class="cat-label">🍓 Frutas</div>
+    <div class="chips" id="g-frutas"></div>
+    <div class="cat-label">🧀 Laticínios & Frutos Secos</div>
+    <div class="chips" id="g-laticinios"></div>
+    <div class="cat-label">🫙 Molhos & Temperos</div>
+    <div class="chips" id="g-molhos"></div>
+  </div>
+
+  <div class="sel-bar" id="sel-bar"><span class="ph">Nenhum ingrediente selecionado ainda...</span></div>
+
+  <p class="section-label">Tipo de refeição</p>
+  <div class="meal-row">
+    <button class="mtype on" data-type="">Qualquer</button>
+    <button class="mtype" data-type="pequeno-almoço">☀️ Pequeno-almoço</button>
+    <button class="mtype" data-type="almoço">🌿 Almoço</button>
+    <button class="mtype" data-type="jantar">🌙 Jantar</button>
+    <button class="mtype" data-type="salada">🥗 Salada</button>
+    <button class="mtype" data-type="lanche">🫐 Lanche</button>
+  </div>
+
+  <div class="controls">
+    <button class="btn-main" id="gen-btn" onclick="generate()">✨ Criar Receita</button>
+    <button class="btn-sec" onclick="clearAll()">Limpar</button>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="divider"></div>
+
+  <div class="saved-sec">
+    <p class="section-label">Receitas Guardadas <span class="badge" id="saved-count">0</span></p>
+    <div class="saved-grid" id="saved-grid">
+      <div class="empty-saved">Ainda não guardaste nenhuma receita ♡</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const EMOJIS = {
+  'Arroz branco':'🍚','Massa':'🍝','Batata':'🥔','Batata doce':'🍠','Cuscuz':'🌾',
+  'Pão':'🍞','Tortilhas':'🫓','Wraps':'🌯','Noodles':'🍜','Puré de batata':'🥔',
+  'Ovos':'🥚','Tofu':'🧊','Seitan':'🍖','Grão-de-bico':'🫘','Lentilhas':'🫘',
+  'Feijão preto':'🫘','Feijão vermelho':'🫘','Ervilhas':'🟢',
+  'Alface':'🥬','Tomate':'🍅','Pepino':'🥒','Cenoura':'🥕','Milho':'🌽',
+  'Cebola':'🧅','Alho francês':'🌿','Brócolo':'🥦','Espinafres':'🌿','Rúcula':'🌿',
+  'Couve':'🥬','Pimentos':'🫑','Cogumelos':'🍄','Alho':'🧄','Abacate':'🥑',
+  'Maçã':'🍎','Pêra':'🍐','Manga':'🥭','Ananás':'🍍','Morangos':'🍓',
+  'Queijo':'🧀','Queijo mozzarella':'🧀','Iogurte grego':'🥛','Natas':'🥛',
+  'Queijo ralado':'🧀','Frutos secos':'🌰','Amêndoas':'🌰','Nozes':'🪨','Amendoim':'🥜','Azeite':'🫒',
+  'Vinagre':'🫙','Limão':'🍋','Maionese':'🫙','Ketchup':'🍅','Molho de soja':'🫙',
+  'Molho pesto':'🌿','Molho de tomate':'🍅','Mel':'🍯','Molho agridoce':'🫙',
+  'Paprika':'🌶️','Orégãos':'🌿','Manjericão':'🌿'
+};
+
+const INGREDIENTS = {
+  'g-cereais':['Arroz branco','Massa','Batata','Batata doce','Cuscuz','Pão','Tortilhas','Wraps','Noodles','Puré de batata'],
+  'g-proteinas':['Ovos','Tofu','Seitan','Grão-de-bico','Lentilhas','Feijão preto','Feijão vermelho','Ervilhas'],
+  'g-legumes':['Alface','Tomate','Pepino','Cenoura','Milho','Cebola','Alho francês','Brócolo','Espinafres','Rúcula','Couve','Pimentos','Cogumelos','Alho','Abacate'],
+  'g-frutas':['Maçã','Pêra','Manga','Ananás','Morangos'],
+  'g-laticinios':['Queijo','Queijo mozzarella','Iogurte grego','Natas','Queijo ralado','Frutos secos','Amêndoas','Nozes','Amendoim','Azeite'],
+  'g-molhos':['Vinagre','Limão','Maionese','Ketchup','Molho de soja','Molho pesto','Molho de tomate','Mel','Molho agridoce','Paprika','Orégãos','Manjericão']
+};
+
+// Curated Unsplash food photo IDs
+const HERO_IDS = [
+  'photo-1512621776951-a57141f2eefd',
+  'photo-1540189549336-e6e99c3679fe',
+  'photo-1498837167922-ddd27525d352',
+  'photo-1547592180-85f173990554',
+  'photo-1565299624946-b28f40a0ae38',
+  'photo-1490645935967-10de6ba17061',
+  'photo-1506368249639-73a05d6f6488',
+  'photo-1455619452474-d2be8b1e70cd'
+];
+
+const RECIPE_IMGS = [
+  'photo-1504674900247-0877df9cc836',
+  'photo-1512621776951-a57141f2eefd',
+  'photo-1540189549336-e6e99c3679fe',
+  'photo-1546069901-ba9599a7e63c',
+  'photo-1567620905732-2d1ec7ab7445',
+  'photo-1565299624946-b28f40a0ae38',
+  'photo-1484723091739-30a097e8f929',
+  'photo-1473093226795-af9932fe5856',
+  'photo-1414235077428-338989a2e8c0',
+  'photo-1482049016688-2d3e1b311543',
+  'photo-1476224203421-9ac39bcb3327',
+  'photo-1455619452474-d2be8b1e70cd',
+  'photo-1490645935967-10de6ba17061',
+  'photo-1498837167922-ddd27525d352',
+  'photo-1547592180-85f173990554',
+  'photo-1494859802809-d069c3b71a8a'
+];
+
+function imgUrl(id, w, h) {
+  return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+}
+
+let selected = new Set();
+let mealType = '';
+let saved = JSON.parse(localStorage.getItem('receitas_v3') || '[]');
+
+function init() {
+  // Hero collage
+  const heroBg = document.getElementById('hero-bg');
+  HERO_IDS.forEach(id => {
+    const img = document.createElement('img');
+    img.src = imgUrl(id, 400, 300);
+    img.alt = '';
+    img.loading = 'eager';
+    heroBg.appendChild(img);
+  });
+
+  // Chips
+  Object.entries(INGREDIENTS).forEach(([gid, items]) => {
+    const grid = document.getElementById(gid);
+    items.forEach(item => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.innerHTML = `<span class="ci">${EMOJIS[item]||'🌿'}</span>${item}`;
+      chip.onclick = () => toggle(item, chip);
+      grid.appendChild(chip);
+    });
+  });
+
+  // Meal type
+  document.querySelectorAll('.mtype').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.mtype').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      mealType = btn.dataset.type;
+    };
+  });
+
+  renderSaved();
+}
+
+function toggle(item, chip) {
+  if (selected.has(item)) { selected.delete(item); chip.classList.remove('on'); }
+  else { selected.add(item); chip.classList.add('on'); }
+  updateBar();
+}
+
+function updateBar() {
+  const bar = document.getElementById('sel-bar');
+  if (!selected.size) { bar.innerHTML = '<span class="ph">Nenhum ingrediente selecionado ainda...</span>'; return; }
+  bar.innerHTML = [...selected].map(i => `<span class="sel-tag">${EMOJIS[i]||'🌿'} ${i}</span>`).join('');
+}
+
+function clearAll() {
+  selected.clear();
+  document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+  updateBar();
+  document.getElementById('result').innerHTML = '';
+}
+
+async function generate() {
+  if (selected.size < 2) {
+    document.getElementById('result').innerHTML = '<div class="err">Seleciona pelo menos 2 ingredientes! 🥕</div>';
+    return;
+  }
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true; btn.textContent = 'A criar...';
+
+  document.getElementById('result').innerHTML = `
+    <div class="loading-card">
+      <div style="font-size:2.5rem;margin-bottom:0.75rem">🍳</div>
+      A criar a tua receita perfeita...
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>`;
+
+  const ingredList = [...selected].join(', ');
+  const mealCtx = mealType ? `Quero especificamente uma receita para ${mealType}.` : '';
+
+  const prompt = `És um chef vegetariano criativo. O utilizador tem: ${ingredList}. ${mealCtx}
+Cria UMA receita deliciosa. Podes assumir que tem sal, pimenta e azeite.
+Responde APENAS em JSON válido, sem texto extra, sem backticks:
+{"nome":"Nome criativo","tipo":"tipo refeição","tempo":"X min","porcoes":"X porções","dificuldade":"Fácil/Médio/Difícil","emoji":"1 emoji que represente o prato","ingredientes_usados":["item1","item2"],"passos":["Passo 1 detalhado","Passo 2","Passo 3","Passo 4"],"dica":"Uma dica especial"}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+    });
+    const data = await res.json();
+    const text = data.content.map(i=>i.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const recipe = JSON.parse(clean);
+    recipe._imgIdx = (recipe.nome.length + recipe.ingredientes_usados.length) % RECIPE_IMGS.length;
+    showRecipe(recipe, false);
+  } catch(e) {
+    document.getElementById('result').innerHTML = '<div class="err">Ups! Algo correu mal. Tenta outra vez 🙈</div>';
+  }
+  btn.disabled = false; btn.textContent = '✨ Criar Receita';
+}
+
+function buildRecipeHTML(recipe, forModal) {
+  const imgId = RECIPE_IMGS[recipe._imgIdx || 0];
+  const imgSrc = imgUrl(imgId, 800, 440);
+  const thumbSrc = imgUrl(imgId, 160, 160);
+  return `
+<div class="rcard">
+  <div class="rcard-img-wrap">
+    <img src="${imgSrc}" alt="${recipe.nome}" loading="lazy">
+  </div>
+  <div class="rcard-header">
+    <div class="rcard-tag">${recipe.tipo||'Receita vegetariana'}</div>
+    <div class="rcard-title">${recipe.emoji||''} ${recipe.nome}</div>
+    <div class="rcard-meta">
+      <span class="rmeta">⏱ ${recipe.tempo}</span>
+      <span class="rmeta">👥 ${recipe.porcoes}</span>
+      <span class="rmeta">⭐ ${recipe.dificuldade}</span>
+    </div>
+  </div>
+  <div class="rcard-body">
+    <p class="rsec-title">Ingredientes</p>
+    <div class="ingr-pills">${recipe.ingredientes_usados.map(i=>`<span class="ingr-pill">${EMOJIS[i]||'🌿'} ${i}</span>`).join('')}</div>
+    <p class="rsec-title">Como fazer</p>
+    <ol class="steps">${recipe.passos.map(p=>`<li>${p}</li>`).join('')}</ol>
+    ${recipe.dica?`<div class="tip-box"><div class="tip-label">💡 Dica</div>${recipe.dica}</div>`:''}
+  </div>
+  ${!forModal?`<div class="rcard-actions">
+    <button class="btn-sm" onclick='saveRecipe(${JSON.stringify(recipe).replace(/'/g,"&#39;")})'>♡ Guardar</button>
+    <button class="btn-sm" onclick="generate()">↻ Outra receita</button>
+  </div>`:`<div style="height:1rem"></div>`}
+</div>`;
+}
+
+function showRecipe(recipe) {
+  document.getElementById('result').innerHTML = buildRecipeHTML(recipe, false);
+  document.getElementById('result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function saveRecipe(recipe) {
+  if (saved.some(r=>r.nome===recipe.nome)) { alert('Já guardaste esta receita! 💕'); return; }
+  recipe._savedAt = new Date().toLocaleDateString('pt-PT');
+  saved.unshift(recipe);
+  localStorage.setItem('receitas_v3', JSON.stringify(saved));
+  renderSaved();
+}
+
+function renderSaved() {
+  document.getElementById('saved-count').textContent = saved.length;
+  const grid = document.getElementById('saved-grid');
+  if (!saved.length) { grid.innerHTML = '<div class="empty-saved">Ainda não guardaste nenhuma receita ♡</div>'; return; }
+  grid.innerHTML = saved.map((r,i)=>{
+    const imgId = RECIPE_IMGS[r._imgIdx||0];
+    const thumbSrc = imgUrl(imgId, 160, 160);
+    return `<div class="sitem" onclick="openSaved(${i})">
+      <img class="sitem-img" src="${thumbSrc}" alt="${r.nome}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="sitem-img-ph" style="display:none">${r.emoji||'🍽️'}</div>
+      <div class="sitem-body">
+        <div class="sitem-title">${r.emoji||''} ${r.nome}</div>
+        <div class="sitem-meta">${r.tipo||''} · ${r.tempo} · ${r._savedAt||''}</div>
+      </div>
+      <button class="sitem-del" onclick="event.stopPropagation();deleteSaved(${i})" title="Apagar">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function openSaved(i) {
+  const r = saved[i];
+  document.getElementById('modal-content').innerHTML = `
+    ${buildRecipeHTML(r,true)}
+    <div style="padding:0 1.5rem 1.5rem;display:flex;gap:8px;">
+      <button class="btn-sm" onclick="deleteSaved(${i});closeModal()">🗑 Apagar</button>
+      <button class="btn-sm" onclick="closeModal()">Fechar</button>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target.id==='modal') document.getElementById('modal').classList.remove('open');
+}
+
+function deleteSaved(i) {
+  saved.splice(i,1);
+  localStorage.setItem('receitas_v3',JSON.stringify(saved));
+  renderSaved();
+}
+
+init();
+</script>
+</body>
+</html>
