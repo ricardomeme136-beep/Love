@@ -196,6 +196,19 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="chips" id="g-laticinios"></div>
     <div class="cat-label">🫙 Molhos & Temperos</div>
     <div class="chips" id="g-molhos"></div>
+
+    <div class="cat-label">➕ Adicionar ingrediente</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="text" id="custom-input" placeholder="Ex: gengibre, tahini..." 
+        style="flex:1;min-width:160px;border:1.5px solid var(--border);border-radius:30px;padding:6px 14px;font-family:'Nunito',sans-serif;font-size:0.8rem;background:var(--blush);color:var(--text);outline:none;transition:border-color .18s;"
+        onkeydown="if(event.key==='Enter')addCustom()"
+        onfocus="this.style.borderColor='var(--pink)'"
+        onblur="this.style.borderColor='var(--border)'">
+      <button onclick="addCustom()" class="chip" style="background:linear-gradient(135deg,var(--pink),var(--mauve));border-color:transparent;color:#fff;font-weight:600;white-space:nowrap;">
+        <span class="ci">✨</span> Adicionar
+      </button>
+    </div>
+    <div class="chips" id="g-custom" style="margin-top:6px;"></div>
   </div>
 
   <div class="sel-bar" id="sel-bar"><span class="ph">🌸 Nenhum ingrediente selecionado ainda...</span></div>
@@ -295,6 +308,36 @@ let mealType = '';
 let saved = JSON.parse(localStorage.getItem('receitas_v4')||'[]');
 
 
+
+function addCustom() {
+  const input = document.getElementById('custom-input');
+  const val = input.value.trim();
+  if (!val) return;
+  // Check not already exists
+  const name = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+  if (selected.has(name)) { input.value=''; return; }
+  
+  // Create chip in custom grid
+  const grid = document.getElementById('g-custom');
+  const chip = document.createElement('button');
+  chip.className = 'chip on';
+  chip.innerHTML = `<span class="ci">🌿</span>${name} <span style="margin-left:4px;opacity:0.8;font-size:0.7rem;" onclick="event.stopPropagation();removeCustom('${name}',this.closest('button'))">✕</span>`;
+  chip.onclick = () => toggle(name, chip);
+  grid.appendChild(chip);
+  
+  // Auto-select it
+  selected.add(name);
+  spawnHeart(chip);
+  updateBar();
+  input.value = '';
+  input.focus();
+}
+
+function removeCustom(name, chip) {
+  selected.delete(name);
+  chip.remove();
+  updateBar();
+}
 
 function init() {
   const heroBg = document.getElementById('hero-bg');
