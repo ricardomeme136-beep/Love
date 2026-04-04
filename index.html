@@ -206,9 +206,22 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   <div class="controls">
     <button class="btn-main" id="gen-btn" onclick="generate()">🌸 Criar a Minha Receita</button>
     <button class="btn-sec" onclick="clearAll()">Limpar</button>
+    <button class="btn-sec" onclick="toggleDebug()" id="debug-btn" style="font-size:0.8rem;">🛠</button>
   </div>
 
   <div id="result"></div>
+
+  <div id="debug-panel" style="margin-top:1.5rem;display:none;">
+    <div style="background:#1a0a12;border-radius:16px;padding:1rem;font-family:monospace;font-size:0.75rem;color:#f0c0d0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <span style="color:#E8A0B4;font-weight:700;font-size:0.8rem;">🛠 Consola de Debug</span>
+        <button onclick="clearLog()" style="background:rgba(232,160,180,0.2);border:1px solid rgba(232,160,180,0.3);border-radius:8px;color:#E8A0B4;font-size:0.7rem;padding:3px 8px;cursor:pointer;font-family:monospace;">Limpar</button>
+      </div>
+      <div id="debug-log" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;">
+        <span style="color:#6B8F71;">// A consola aparece aqui quando clicares em Criar Receita</span>
+      </div>
+    </div>
+  </div>
 
   <div class="divider"></div>
 
@@ -285,6 +298,30 @@ function imgUrl(id,w,h){return `https://images.unsplash.com/${id}?auto=format&fi
 let selected = new Set();
 let mealType = '';
 let saved = JSON.parse(localStorage.getItem('receitas_v4')||'[]');
+
+// --- DEBUG HELPERS ---
+let debugVisible = false;
+function toggleDebug(){
+  debugVisible=!debugVisible;
+  document.getElementById('debug-panel').style.display=debugVisible?'block':'none';
+  document.getElementById('debug-btn').textContent=debugVisible?'🛠 ✓':'🛠';
+}
+function clearLog(){
+  document.getElementById('debug-log').innerHTML='<span style="color:#6B8F71;">// log limpo</span>';
+}
+function log(type,msg){
+  const panel=document.getElementById('debug-panel');
+  if(!debugVisible){panel.style.display='block';debugVisible=true;document.getElementById('debug-btn').textContent='🛠 ✓';}
+  const el=document.createElement('div');
+  const colors={ok:'#6BCB77',err:'#FF6B6B',info:'#C8A0E0'};
+  const prefix={ok:'✅',err:'❌',info:'ℹ️'};
+  el.style.cssText='color:'+( colors[type]||'#f0c0d0')+';word-break:break-all;border-left:2px solid '+(colors[type]||'#f0c0d0')+';padding-left:6px;';
+  el.textContent=(prefix[type]||'')+' '+msg;
+  const logEl=document.getElementById('debug-log');
+  logEl.appendChild(el);
+  logEl.scrollTop=logEl.scrollHeight;
+}
+// ----------------------
 
 function init() {
   const heroBg = document.getElementById('hero-bg');
@@ -371,22 +408,56 @@ Cria UMA receita deliciosa. Podes assumir que tem sal, pimenta e azeite.
 Responde APENAS em JSON válido, sem texto extra, sem backticks:
 {"nome":"Nome criativo","tipo":"tipo refeição","tempo":"X min","porcoes":"X porções","dificuldade":"Fácil/Médio/Difícil","emoji":"1 emoji que represente o prato","ingredientes_usados":["item1","item2"],"passos":["Passo 1 detalhado","Passo 2","Passo 3","Passo 4"],"dica":"Uma dica especial"}`;
 
+  const WORKER='https://square-dream-284b.ricardomeme136.workers.dev/';
+  log('info','🚀 A chamar worker: '+WORKER);
+  log('info','📦 Ingredientes: '+[...selected].join(', '));
   try {
-    // Calls your private Cloudflare Worker — API key stays hidden on the server
-    const res=await fetch("https://square-dream-284b.ricardomeme136.workers.dev/",{
+    const bodyPayload=JSON.stringify({prompt:prompt});
+    log('info','📤 A enviar pedido POST...');
+    const res=await fetch(WORKER,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({prompt:prompt})
+      body:bodyPayload
     });
-    if(!res.ok){throw new Error('err');}
-    const data=await res.json();
+    log(res.ok?'ok':'err','📡 Resposta HTTP: '+res.status+' '+res.statusText);
+    const rawText=await res.text();
+    log('info','📥 Resposta raw (primeiros 300 chars): '+rawText.substring(0,300));
+    if(!res.ok){
+      log('err','❌ Worker devolveu erro '+res.status);
+      log('err','Corpo: '+rawText);
+      throw new Error('http_'+res.status);
+    }
+    let data;
+    try{data=JSON.parse(rawText);}catch(parseErr){
+      log('err','❌ JSON inválido na resposta do worker');
+      log('err',parseErr.message);
+      throw new Error('json_parse');
+    }
+    if(data.error){
+      log('err','❌ Erro da API Anthropic: '+JSON.stringify(data.error));
+      throw new Error('anthropic_error');
+    }
+    if(!data.content){
+      log('err','❌ Resposta sem campo content: '+JSON.stringify(data).substring(0,200));
+      throw new Error('no_content');
+    }
+    log('ok','✅ Resposta da IA recebida com sucesso!');
     const text=data.content.map(i=>i.text||'').join('');
+    log('info','📝 Texto da IA: '+text.substring(0,200)+'...');
     const clean=text.replace(/```json|```/g,'').trim();
-    const recipe=JSON.parse(clean);
+    let recipe;
+    try{recipe=JSON.parse(clean);}catch(recipeErr){
+      log('err','❌ JSON da receita inválido');
+      log('err',recipeErr.message);
+      log('err','Texto recebido: '+clean.substring(0,300));
+      throw new Error('recipe_json');
+    }
+    log('ok','🍽️ Receita criada: '+recipe.nome);
     recipe._imgIdx=(recipe.nome.length+recipe.ingredientes_usados.length)%RECIPE_IMGS.length;
     showRecipe(recipe);
   } catch(e) {
-    document.getElementById('result').innerHTML='<div class="err">💔 Ups! Algo correu mal. Tenta outra vez 🙈</div>';
+    log('err','💥 Erro final: '+e.message);
+    document.getElementById('result').innerHTML='<div class="err">💔 Ups! Algo correu mal — abre a consola 🛠 para ver o problema!</div>';
   }
   btn.disabled=false; btn.textContent='🌸 Criar a Minha Receita';
 }
