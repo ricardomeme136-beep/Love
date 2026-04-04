@@ -371,14 +371,14 @@ Cria UMA receita deliciosa. Podes assumir que tem sal, pimenta e azeite.
 Responde APENAS em JSON válido, sem texto extra, sem backticks:
 {"nome":"Nome criativo","tipo":"tipo refeição","tempo":"X min","porcoes":"X porções","dificuldade":"Fácil/Médio/Difícil","emoji":"1 emoji que represente o prato","ingredientes_usados":["item1","item2"],"passos":["Passo 1 detalhado","Passo 2","Passo 3","Passo 4"],"dica":"Uma dica especial"}`;
 
-  const apiKey='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';
   try {
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
+    // Calls your private Cloudflare Worker — API key stays hidden on the server
+    const res=await fetch("https://square-dream-284b.ricardomeme136.workers.dev/",{
       method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({prompt:prompt})
     });
-    if(!res.ok){if(res.status===401)throw new Error('chave');throw new Error('err');}
+    if(!res.ok){throw new Error('err');}
     const data=await res.json();
     const text=data.content.map(i=>i.text||'').join('');
     const clean=text.replace(/```json|```/g,'').trim();
